@@ -12,6 +12,8 @@
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "backprop.h"
+
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -200,49 +202,8 @@ struct Network
         std::cout << in << "\n";
         return in;
     }
-    void backprop(cv::Mat x,cv::Mat y) {
-        // Y DON'T use
-        std::vector<cv::Mat> nabla_b;
-        std::vector<cv::Mat> nabla_w;
-
-        for (auto x : biases) {
-            nabla_b.push_back(cv::Mat(x.size(), CV_64F, double(0)));
-        }
-        for (auto x : weights) {
-            nabla_w.push_back(cv::Mat(x.size(), CV_64F, double(0)));
-        }
-        auto activation = cv::Mat(1, 784, CV_64F);
-        activation = x.reshape(1, 784);
-        activation.convertTo(activation, CV_64F);
-        activation = activation / 255.0;
-        std::vector<cv::Mat> activations;
-        activations.push_back(activation.clone());
-        std::vector<cv::Mat> zs;
-
-        std::for_each(
-            boost::make_zip_iterator(
-                boost::make_tuple(std::begin(biases), std::begin(weights))
-            ),
-            boost::make_zip_iterator(
-                boost::make_tuple(std::end(biases), std::end(weights))
-            ),
-            [&activation](auto tuple) {
-                auto b = tuple.get<0>();
-                auto w = tuple.get<1>();
-
-                std::cout << b << '\n';
-                std::cout << w << '\n';
-                std::cout << activation << '\n';
 
 
-                cv::Mat z = w*activation+b;
-                
-                std::cout << z << '\n';
-            }
-        );
-
-
-    }
     void update_mini_batch(int start, int end, double eta) {
         std::vector<cv::Mat> nabla_b;
         std::vector<cv::Mat> nabla_w;
@@ -255,7 +216,7 @@ struct Network
         }
 
         for (int i = start; i < end; ++i) {
-            backprop(std::get<0>(training_data[i]), std::get<0>(training_data[i]));
+            backprop(std::get<0>(training_data[i]), std::get<0>(training_data[i]),biases,weights);
         }
 
 

@@ -15,7 +15,7 @@ find_package(boost REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable( mlcpp  main.cpp)
+add_executable( mlcpp  main.cpp backprop.cpp)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD 17)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD_REQUIRED ON)
 

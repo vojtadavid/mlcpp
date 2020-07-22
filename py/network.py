@@ -59,7 +59,7 @@ class Network(object):
         # with open(filename,"rb") as input:
         #     network = pickle.load(input)
         #     return network
-        for r, d, f in os.walk("../out/build/x64-Debug/data"):
+        for r, d, f in os.walk("../build/data"):
             self.biases = []
             self.weights = []
             for file in f:
