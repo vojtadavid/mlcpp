@@ -2,6 +2,29 @@
 #include <opencv2/opencv.hpp>
 #include <boost/iterator/zip_iterator.hpp>
 
+//return 1.0 / (1.0 + np.exp(-z))
+auto sigmoid(cv::Mat input) {
+    auto z = input.clone();
+    for (int i = 0; i < z.rows; i++)//through each row in Mat M
+        for (int j = 0; j < z.cols; j++)//through each column
+            z.at<double>(i, j) = 1.0/(1.0 + std::exp(-z.at<double>(i, j)));
+    return z;
+}
+
+auto sigmoid_prime(cv::Mat z) {
+    cv::Mat ret = sigmoid(z);
+    ret.mul(cv::Mat(z.size(),CV_64FC1,cv::Scalar(1.0)) - sigmoid(z));
+    return ret;
+}
+
+auto cost_derivative(cv::Mat activation, cv::Mat yy) {
+    cv::Mat y;
+    yy.convertTo(y, CV_64FC1);
+    auto a = activation.clone();
+    a = a - y;
+    return a;
+}
+
 std::tuple<std::vector<cv::Mat>, std::vector<cv::Mat>>  backprop(cv::Mat x, cv::Mat y, std::vector<cv::Mat> biases, std::vector<cv::Mat> weights) {
 
     // Y DON'T use
@@ -26,10 +49,16 @@ std::tuple<std::vector<cv::Mat>, std::vector<cv::Mat>>  backprop(cv::Mat x, cv::
         auto b = biases[i];
         auto w = weights[i];
         cv::Mat z = w * activation + b;
-
-        std::cout << z << '\n';
+        zs.push_back(z.clone());
+        activation = sigmoid(z);
+        activations.push_back(z.clone());
+        //std::cout << z << '\n';
     }
 
+    auto m1 = cost_derivative(activations[activations.size() - 1], y);
+    auto m2 = sigmoid_prime(zs[zs.size() - 1]);
+    cv::Mat delta = m1.mul(m2);
+    std::cout << delta << '\n';
     //std::for_each(
     //    boost::make_zip_iterator(
     //        boost::make_tuple(std::begin(biases), std::begin(weights))

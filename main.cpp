@@ -216,7 +216,11 @@ struct Network
         }
 
         for (int i = start; i < end; ++i) {
-            backprop(std::get<0>(training_data[i]), std::get<0>(training_data[i]),biases,weights);
+            auto label = cv::Mat(10, 1, CV_32SC1);
+            label = 0;
+            int l = std::get<1>(training_data[i]);
+            label.at<int>(l,0) = 1;
+            backprop(std::get<0>(training_data[i]), label,biases,weights);
         }
 
 
