@@ -127,7 +127,6 @@ class Network(object):
         zs = [] # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
-            print(z)
             zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
@@ -148,6 +147,9 @@ class Network(object):
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+
+        # print(nabla_w[0])
+        print(nabla_w[1])
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):

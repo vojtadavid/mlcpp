@@ -220,7 +220,7 @@ struct Network
             label = 0;
             int l = std::get<1>(training_data[i]);
             label.at<int>(l,0) = 1;
-            backprop(std::get<0>(training_data[i]), label,biases,weights);
+            auto [delta_nabla_b, delta_nabla_w] = backprop(std::get<0>(training_data[i]), label,biases,weights);
         }
 
 
