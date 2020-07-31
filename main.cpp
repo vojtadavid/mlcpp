@@ -221,6 +221,15 @@ struct Network
             int l = std::get<1>(training_data[i]);
             label.at<int>(l,0) = 1;
             auto [delta_nabla_b, delta_nabla_w] = backprop(std::get<0>(training_data[i]), label,biases,weights);
+
+            for (int j = 0; j < delta_nabla_b.size(); j++) {
+                nabla_b[j] = nabla_b[j] + delta_nabla_b[j];
+            }
+
+            for (int j = 0; j < delta_nabla_w.size(); j++) {
+                nabla_w[j] = nabla_w[j] + delta_nabla_w[j];
+            }
+            int xxx=0;
         }
 
 
