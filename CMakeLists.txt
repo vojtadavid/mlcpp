@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(mlcpp)
 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZI")
+endif()
 
 
 find_package( OpenCV REQUIRED )
@@ -24,3 +27,9 @@ set_property(TARGET mlcpp PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_libraries(mlcpp ${OpenCV_LIBS} )
 target_link_libraries(mlcpp ${Boost_LIBRARIES})
 #target_link_libraries(mlcpp ${Python_LIBRARIES})
+
+
+
+add_executable(testcpp testcpp.cpp)
+target_link_libraries(testcpp ${OpenCV_LIBS} )
+target_link_libraries(testcpp ${Boost_LIBRARIES})

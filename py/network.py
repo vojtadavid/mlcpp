@@ -13,6 +13,7 @@ and omits many desirable features.
 # Standard library
 import random
 import os
+import cv2
 
 # Third-party libraries
 import numpy as np
@@ -109,12 +110,16 @@ class Network(object):
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-            xxx=0
         self.weights = [w-(eta/len(mini_batch))*nw
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
 
+        f = cv2.FileStorage('w.yml', flags=1)
+        f.write("w",self.weights[0])
+        f.release()
+
+        return
 
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -150,8 +155,6 @@ class Network(object):
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
 
-        # print(nabla_w[0])
-        print(nabla_w[1])
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):
@@ -169,6 +172,10 @@ class Network(object):
         return (output_activations-y)
 
 #### Miscellaneous functions
+def dump(m : np.ndarray, filename : str):
+    cv2.imwrite(str,m)
+
+
 def sigmoid(z):
     """The sigmoid function."""
     return 1.0/(1.0+np.exp(-z))

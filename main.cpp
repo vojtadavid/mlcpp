@@ -26,6 +26,8 @@ struct Network
     std::vector<cv::Mat> biases;
     std::vector<cv::Mat> weights;
     std::vector<std::tuple<cv::Mat, int>> training_data;
+    std::vector<std::tuple<cv::Mat, int>> test_data;
+
 
 
 
@@ -56,11 +58,21 @@ struct Network
 
         auto images = loadTrainImages("./../train-images-idx3-ubyte/train-images.idx3-ubyte");
         auto labels = loadTrainLabels("./../train-labels-idx1-ubyte/train-labels.idx1-ubyte");
+
+        auto test_images = loadTrainImages("./../t10k-images-idx3-ubyte/t10k-images.idx3-ubyte");
+        auto train_labels= loadTrainLabels("./../t10k-labels-idx1-ubyte/t10k-labels.idx1-ubyte");
+
         
 
         auto l = labels.begin();
         for (auto& i : images) {
             training_data.push_back(std::make_tuple(i, *l));
+            l++;
+        }
+
+        l = train_labels.begin();
+        for (auto& i : test_images) {
+            test_data.push_back(std::make_tuple(i, *l));
             l++;
         }
     }
@@ -168,6 +180,9 @@ struct Network
 
     auto loadTrainLabels(std::string path) {
         std::ifstream istrm(path, std::ios::binary);
+        if (!istrm.is_open()) {
+            throw std::runtime_error("can't open file " + path);
+        }
 
         int no_labels, magic;
         istrm.read((char*)&magic, 4);
@@ -187,22 +202,6 @@ struct Network
 
 
     }
-
-    auto feedforward(cv::Mat input) {
-        auto in = input.clone();
-        auto w = weights.begin();
-        auto b = biases.begin();
-
-        for (auto it : weights) {
-            in = ( (*w) * in) + *b;
-            in = sigmoid(in);
-            w++;
-            b++;
-        }
-        std::cout << in << "\n";
-        return in;
-    }
-
 
     void update_mini_batch(int start, int end, double eta) {
         std::vector<cv::Mat> nabla_b;
@@ -229,8 +228,21 @@ struct Network
             for (int j = 0; j < delta_nabla_w.size(); j++) {
                 nabla_w[j] = nabla_w[j] + delta_nabla_w[j];
             }
-            int xxx=0;
         }
+
+
+        for (int i = 0; i < this->weights.size(); i++) {
+            this->weights[i] = this->weights[i] - (eta/(end-start))*nabla_w[i];
+        }
+
+        for (int i = 0; i < this->biases.size(); i++) {
+            this->biases[i] = this->biases[i] - (eta / (end - start)) * nabla_b[i];
+        }
+
+        cv::FileStorage fs;
+        fs.open("w.yml", cv::FileStorage::WRITE);
+        fs.write("ww", weights[0]);
+        fs.release();
 
 
 
@@ -246,7 +258,34 @@ struct Network
             for (int b = 0; b < training_data.size(); b += mini_batch_size) {
                 update_mini_batch(b, b + mini_batch_size, eta);
             }
+
+            if (!test_data.empty()) {
+                evaluate();
+            }
+
         }
+    }
+
+    void evaluate() {
+        for (auto& td: this->test_data) {
+            auto label = cv::Mat(10, 1, CV_32SC1);
+            label = 0;
+            int l = std::get<1>(td);
+            label.at<int>(l, 0) = 1;
+
+            feedforward(std::get<0>(td));
+        }
+    }
+
+    auto feedforward(cv::Mat a) {
+        auto A = cv::Mat(a.reshape(1, 784));
+        A.convertTo(A, CV_64FC1);
+        A = A / 255.0;
+        for (int i = 0; i < this->weights.size(); i++) {
+            cv::Mat t = weights[i] * A + biases[i];
+            A = sigmoid(t);
+        }
+        return A;
     }
 
 };
