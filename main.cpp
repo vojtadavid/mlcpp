@@ -242,6 +242,7 @@ struct Network
         cv::FileStorage fs;
         fs.open("w.yml", cv::FileStorage::WRITE);
         fs.write("ww", weights[0]);
+        cv::rou
         fs.release();
 
 

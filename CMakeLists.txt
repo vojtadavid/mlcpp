@@ -11,7 +11,7 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 link_directories( ${OpenCV_LIB_DIR} )
 
-find_package(boost REQUIRED)
+find_package(Boost REQUIRED)
 
 #find_package (Python COMPONENTS Interpreter Development)
 #include_directories(${Python_INCLUDE_DIRS})
@@ -22,7 +22,7 @@ add_executable( mlcpp  main.cpp backprop.cpp)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD 17)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD_REQUIRED ON)
 
-
+target_compile_options(mlcpp PRIVATE /ZI)
 
 target_link_libraries(mlcpp ${OpenCV_LIBS} )
 target_link_libraries(mlcpp ${Boost_LIBRARIES})
