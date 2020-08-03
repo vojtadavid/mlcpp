@@ -3,17 +3,19 @@
 #include <boost/iterator/zip_iterator.hpp>
 
 //return 1.0 / (1.0 + np.exp(-z))
-auto sigmoid(cv::Mat input) {
-    auto z = input.clone();
-    for (int i = 0; i < z.rows; i++)//through each row in Mat M
-        for (int j = 0; j < z.cols; j++)//through each column
-            z.at<double>(i, j) = 1.0/(1.0 + std::exp(-z.at<double>(i, j)));
-    return z;
+auto sigmoid(cv::Mat in) {
+    //auto z = input.clone();
+    //for (int i = 0; i < z.rows; i++)//through each row in Mat M
+    //    for (int j = 0; j < z.cols; j++)//through each column
+    //        z.at<double>(i, j) = 1.0/(1.0 + std::exp(-z.at<double>(i, j)));
+    //return z;
+    cv::exp(-in, in);
+    return 1 / (1 + in);
 }
 
 auto sigmoid_prime(cv::Mat z) {
-    cv::Mat ret = sigmoid(z);
-    ret = ret.mul(cv::Mat(z.size(),CV_64FC1,cv::Scalar(1.0)) - sigmoid(z));
+    cv::Mat ret = sigmoid(z.clone());
+    ret = ret.mul(cv::Mat(z.size(),CV_64FC1,cv::Scalar(1.0)) - sigmoid(z.clone()));
     return ret;
 }
 
@@ -54,6 +56,7 @@ std::tuple<std::vector<cv::Mat>, std::vector<cv::Mat>>  backprop(cv::Mat x, cv::
         cv::Mat z = w * activation + b;
         zs.push_back(z.clone());
         activation = sigmoid(z);
+
         activations.push_back(activation.clone());
     }
 

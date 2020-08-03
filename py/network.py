@@ -76,6 +76,17 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
+    def dumpYML(self):
+        f = cv2.FileStorage('weightsbiases.yml', flags=1)
+        for w in self.weights:
+            x = w.astype("float32")
+            f.write("w"+str(w.shape[1])+str(w.shape[0]), w)
+        for w in self.biases:
+            x = w.astype("float32")
+            f.write("b" + str(w.shape[1]) + str(w.shape[0]), w)
+
+        f.release()
+
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
         """Train the neural network using mini-batch stochastic
@@ -114,12 +125,6 @@ class Network(object):
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
-
-        f = cv2.FileStorage('w.yml', flags=1)
-        f.write("w",self.weights[0])
-        f.release()
-
-        return
 
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -172,9 +177,6 @@ class Network(object):
         return (output_activations-y)
 
 #### Miscellaneous functions
-def dump(m : np.ndarray, filename : str):
-    cv2.imwrite(str,m)
-
 
 def sigmoid(z):
     """The sigmoid function."""

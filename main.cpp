@@ -195,11 +195,10 @@ struct Network
         return labels;
     }
 
-    cv::Mat sigmoid(cv::Mat& in) {
+    cv::Mat sigmoid(cv::Mat in) {
         //cv::Mat result = in.clone();
         cv::exp(-in, in);
         return 1 / (1 + in);
-
 
     }
 
@@ -239,21 +238,13 @@ struct Network
             this->biases[i] = this->biases[i] - (eta / (end - start)) * nabla_b[i];
         }
 
-        cv::FileStorage fs;
-        fs.open("w.yml", cv::FileStorage::WRITE);
-        fs.write("ww", weights[0]);
-        cv::rou
-        fs.release();
-
-
-
     }
 
     void SGD(int epochs = 30, int mini_batch_size = 10, double eta = 3.0) {
         std::random_device rd;
         std::mt19937 g(rd());
         for (int j = 0; j < epochs; j++) {
-            //std::shuffle(training_data.begin(), training_data.end(), g);
+            std::shuffle(training_data.begin(), training_data.end(), g);
             
             std::vector<std::tuple<cv::Mat, int>> mini_batches;
             for (int b = 0; b < training_data.size(); b += mini_batch_size) {
@@ -268,14 +259,21 @@ struct Network
     }
 
     void evaluate() {
+        int success = 0;
         for (auto& td: this->test_data) {
             auto label = cv::Mat(10, 1, CV_32SC1);
             label = 0;
             int l = std::get<1>(td);
             label.at<int>(l, 0) = 1;
+            auto result = feedforward(std::get<0>(td));
+            int idx,idy;
+            double minval, maxval;
+            cv::minMaxIdx(result, &minval,&maxval, &idx,&idy);
 
-            feedforward(std::get<0>(td));
+            if (idy == l)
+                success++;
         }
+        std::cout << "SUCCESS " << success << '\n';
     }
 
     auto feedforward(cv::Mat a) {
