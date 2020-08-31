@@ -55,7 +55,6 @@ struct Network
 
         }
 
-
         auto images = loadTrainImages("./../train-images-idx3-ubyte/train-images.idx3-ubyte");
         auto labels = loadTrainLabels("./../train-labels-idx1-ubyte/train-labels.idx1-ubyte");
 
@@ -164,7 +163,6 @@ struct Network
         rows = reverseInt(rows);
         colums = reverseInt(colums);
 
-        //printf("magic %d\nnumber of images %d\nrows %d\ncolums %d\n", magic, no_images, rows, colums);
 
         std::vector<cv::Mat> images;
         images.reserve(no_images);
@@ -172,8 +170,6 @@ struct Network
             cv::Mat A(rows, colums, CV_8UC1);
             istrm.read((char*)A.data, rows * colums);
             images.push_back(A);
-            //cv::imshow("A", A);
-            //cv::waitKey();
         }
         return images;
     }
@@ -202,7 +198,7 @@ struct Network
 
     }
 
-    void update_mini_batch(int start, int end, double eta) {
+    void update_mini_batch(int start, int end, double eta, int n, double lmbda = 5.0) {
         std::vector<cv::Mat> nabla_b;
         std::vector<cv::Mat> nabla_w;
         
@@ -231,7 +227,8 @@ struct Network
 
 
         for (int i = 0; i < this->weights.size(); i++) {
-            this->weights[i] = this->weights[i] - (eta/(end-start))*nabla_w[i];
+            //this->weights[i] = this->weights[i] - (eta/(end-start))*nabla_w[i];
+            this->weights[i] = (1 - eta * (lmbda / n)) * this->weights[i] - (eta / (end - start)) * nabla_w[i];
         }
 
         for (int i = 0; i < this->biases.size(); i++) {
@@ -240,15 +237,15 @@ struct Network
 
     }
 
-    void SGD(int epochs = 30, int mini_batch_size = 10, double eta = 3.0) {
+    void SGD(int epochs = 60, int mini_batch_size = 10, double eta = 0.1) {
         std::random_device rd;
         std::mt19937 g(rd());
         for (int j = 0; j < epochs; j++) {
             std::shuffle(training_data.begin(), training_data.end(), g);
-            
+            std::cout << "EPOCH " << j << '\n';
             std::vector<std::tuple<cv::Mat, int>> mini_batches;
             for (int b = 0; b < training_data.size(); b += mini_batch_size) {
-                update_mini_batch(b, b + mini_batch_size, eta);
+                update_mini_batch(b, b + mini_batch_size, eta,training_data.size());
             }
 
             if (!test_data.empty()) {
@@ -306,9 +303,9 @@ int reverseInt(int i)
 int main()
 {
   
-    Network<double> net({ 784,30,10 });
+    Network<double> net({ 784,100,10 });
     //net.savedata();
-    net.loaddata();
+    //net.loaddata();
     net.SGD();
 
 
