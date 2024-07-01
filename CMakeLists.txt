@@ -17,7 +17,7 @@ add_executable( mlcpp  main.cpp backprop.cpp)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD 17)
 set_property(TARGET mlcpp PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_compile_options(mlcpp PRIVATE /ZI)
+#target_compile_options(mlcpp PRIVATE /ZI)
 
 target_link_libraries(mlcpp ${OpenCV_LIBS} )
 target_link_libraries(mlcpp ${Boost_LIBRARIES})
